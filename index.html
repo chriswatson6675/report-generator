@@ -357,7 +357,7 @@
 
 <header>
   <h1>Student Report Generator</h1>
-  <p>Powered by Claude AI</p>
+  <p>Powered by Pixies</p>
 </header>
 
 <div class="container">
@@ -390,15 +390,15 @@
     <div class="step-label">Step 2</div>
     <h2>Choose a report template</h2>
     <div class="template-options">
-      <label class="template-option active" id="opt-physics" onclick="setTemplate('physics')">
-        <input type="radio" name="template" value="physics" checked>
-        <div class="template-option-title">Physics Report</div>
-        <div class="template-option-desc">Academic, technical language. Focus on analytical and practical skills.</div>
-      </label>
-      <label class="template-option" id="opt-formtutor" onclick="setTemplate('formtutor')">
-        <input type="radio" name="template" value="formtutor">
+      <label class="template-option active" id="opt-formtutor" onclick="setTemplate('formtutor')">
+        <input type="radio" name="template" value="formtutor" checked>
         <div class="template-option-title">Form Tutor Report</div>
         <div class="template-option-desc">Holistic, developmental language. Focus on pastoral care and character.</div>
+      </label>
+      <label class="template-option" id="opt-physics" onclick="setTemplate('physics')">
+        <input type="radio" name="template" value="physics">
+        <div class="template-option-title">Physics Report</div>
+        <div class="template-option-desc">Academic, technical language. Focus on analytical and practical skills.</div>
       </label>
     </div>
   </div>
@@ -502,7 +502,7 @@ const TEMPLATES = {
   },
 };
 
-let currentTemplate    = 'physics';
+let currentTemplate    = 'formtutor';
 let currentTiming      = 'end-of-year';
 let customChars        = [];
 let students           = [];   // [{ name, selected, grades: { char: 1-5 } }]
