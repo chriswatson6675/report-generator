@@ -901,7 +901,6 @@ async function generateReports() {
   document.getElementById('gen-btn').disabled = false;
   updateSelCount();
   document.getElementById('csv-download-row').style.display = 'flex';
-  showBeerModal();
 }
 
 function showBeerModal() {
@@ -910,16 +909,21 @@ function showBeerModal() {
   overlay.innerHTML = `
     <div class="modal-card">
       <span class="modal-emoji">🍺</span>
-      <div class="modal-title">Your reports are ready!</div>
+      <div class="modal-title">Before you copy that…</div>
       <div class="modal-body">
         The creator of this tool really doesn't need any thanks at all —
         it was a pleasure.<br><br>
         That said, <em>if you happen to be passing an off licence this weekend</em>,
         a cold beer would not go unappreciated. Just saying.
       </div>
-      <button class="btn btn-primary" style="width:100%" onclick="closeBeerModal(this)">
-        Thanks, I'll bear that in mind 🍻
-      </button>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary" style="width:100%" onclick="beerAgree(this)">
+          Sounds fair — noted 🍻
+        </button>
+        <button class="btn btn-secondary" style="width:100%" onclick="beerDisagree(this)">
+          I refuse
+        </button>
+      </div>
     </div>`;
   document.body.appendChild(overlay);
 }
@@ -1029,7 +1033,19 @@ async function regenerateOne(name) {
   }
 }
 
+let beerAgreed    = false;
+let pendingAction = null;
+
 async function copyReport(id, btn) {
+  if (!beerAgreed) {
+    pendingAction = () => doCopy(id, btn);
+    showBeerModal();
+    return;
+  }
+  await doCopy(id, btn);
+}
+
+async function doCopy(id, btn) {
   const text = document.getElementById(`rt-${id}`)?.textContent || '';
   try {
     await navigator.clipboard.writeText(text);
@@ -1040,8 +1056,69 @@ async function copyReport(id, btn) {
   }
 }
 
+function beerAgree(btn) {
+  beerAgreed = true;
+  closeBeerModal(btn);
+  if (pendingAction) { pendingAction(); pendingAction = null; }
+}
+
+function beerDisagree(btn) {
+  const card = btn.closest('.modal-card');
+  card.innerHTML = `
+    <span class="modal-emoji">🚔🎩⛓️</span>
+    <div class="modal-title">Go directly to jail.</div>
+    <div class="modal-body">
+      Do not pass Go. Do not collect £200.<br><br>
+      <em>Last chance — reconsider your position on the beer situation.</em>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary" style="width:100%" onclick="beerAgree(this)">
+        OK fine, a beer sounds reasonable 🍺
+      </button>
+      <button class="btn btn-secondary" style="width:100%" onclick="finalRefusal(this)">
+        Still no.
+      </button>
+    </div>`;
+}
+
+function finalRefusal(btn) {
+  const card = btn.closest('.modal-card');
+  card.innerHTML = `
+    <span class="modal-emoji">😢</span>
+    <div class="modal-title">We're sorry to hear that.</div>
+    <div class="modal-body">
+      Unfortunately, you've just lost all of your work.<br><br>
+      <em>We hope the decision was worth it.</em>
+    </div>
+    <button class="btn btn-secondary" style="width:100%" onclick="clearAndClose(this)">
+      OK
+    </button>`;
+}
+
+function clearAndClose(btn) {
+  students = []; generatedStudents = []; customChars = [];
+  document.getElementById('names-input').value = '';
+  document.getElementById('csv-preview').style.display = 'none';
+  document.getElementById('grade-step').style.display = 'none';
+  document.getElementById('generate-bar').style.display = 'none';
+  document.getElementById('reports-section').style.display = 'none';
+  document.getElementById('reports-list').innerHTML = '';
+  document.getElementById('csv-download-row').style.display = 'none';
+  renderChars();
+  closeBeerModal(btn);
+}
+
 // ── CSV download ──────────────────────────────────────────────────────────────
 function downloadCSV() {
+  if (!beerAgreed) {
+    pendingAction = doDownloadCSV;
+    showBeerModal();
+    return;
+  }
+  doDownloadCSV();
+}
+
+function doDownloadCSV() {
   const presetChars = TEMPLATES[currentTemplate].chars;
   const headers = ['Student Name', ...presetChars, 'Report'];
 
