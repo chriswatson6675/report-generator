@@ -4,381 +4,561 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Report Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue:       #2b6cb0;
-      --blue-dark:  #2c5282;
-      --blue-light: #ebf8ff;
-      --green:      #276749;
-      --green-light:#f0fff4;
-      --red:        #c53030;
-      --red-light:  #fff5f5;
-      --gray-50:    #f7fafc;
-      --gray-100:   #edf2f7;
-      --gray-200:   #e2e8f0;
-      --gray-400:   #a0aec0;
-      --gray-600:   #4a5568;
-      --gray-700:   #2d3748;
-      --gray-900:   #1a202c;
-      --radius:     10px;
-      --shadow:     0 1px 3px rgba(0,0,0,0.08);
+      --primary:        #4F46E5;
+      --primary-dark:   #4338CA;
+      --primary-light:  #EEF2FF;
+      --primary-border: #C7D2FE;
+      --primary-glow:   rgba(79,70,229,0.12);
+
+      --success:        #059669;
+      --success-dark:   #047857;
+      --success-light:  #D1FAE5;
+      --success-border: #6EE7B7;
+
+      --danger:         #DC2626;
+      --danger-light:   #FEE2E2;
+      --danger-border:  #FCA5A5;
+
+      --bg:             #F1F4F9;
+      --surface:        #FFFFFF;
+      --surface-raised: #FAFBFD;
+      --border:         #E2E8F0;
+      --border-mid:     #CBD5E1;
+
+      --text:           #0F172A;
+      --text-mid:       #334155;
+      --text-muted:     #64748B;
+      --text-faint:     #94A3B8;
+
+      --radius-sm:      8px;
+      --radius:         12px;
+      --radius-lg:      16px;
+
+      --shadow-xs:      0 1px 2px rgba(15,23,42,0.04);
+      --shadow-sm:      0 2px 4px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow:         0 4px 12px rgba(15,23,42,0.07), 0 2px 4px rgba(15,23,42,0.04);
+
+      --transition:     150ms cubic-bezier(0.4,0,0.2,1);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: #f0f4f8;
-      color: var(--gray-900);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* ── Header ── */
     header {
-      background: var(--blue);
-      color: white;
-      padding: 18px 32px;
+      background: linear-gradient(135deg, #3730A3 0%, #4F46E5 55%, #6366F1 100%);
+      position: relative;
+      overflow: hidden;
     }
-    header h1 { font-size: 1.3rem; font-weight: 700; }
-    header p  { font-size: 0.82rem; opacity: 0.75; margin-top: 2px; }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.06) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%);
+    }
+    .header-inner {
+      position: relative;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 28px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-brand { display: flex; align-items: center; gap: 16px; }
+    .header-icon {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .header-text h1 {
+      font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.02em;
+    }
+    .header-text p { font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-top: 3px; }
+    .header-badge {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+      font-size: 0.73rem; font-weight: 600;
+      padding: 5px 13px; border-radius: 99px;
+      white-space: nowrap; letter-spacing: 0.02em;
+    }
 
     /* ── Layout ── */
-    .container { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
 
+    /* ── Step cards ── */
     .step {
-      background: white;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 22px 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    .step-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 6px;
-    }
-    .step h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--gray-700);
-      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 28px 24px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition);
     }
 
-    /* ── Template picker ── */
-    .template-options {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+    .step-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
     }
+    .step-num {
+      width: 27px; height: 27px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 8px;
+      font-size: 0.78rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 0.98rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+
+    /* ── Option grids ── */
+    .option-grid { display: grid; gap: 12px; }
+    .option-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .option-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
     .template-option {
-      flex: 1;
-      min-width: 200px;
-      border: 2px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      cursor: pointer;
       position: relative;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px 16px;
+      cursor: pointer;
+      background: var(--surface-raised);
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      user-select: none;
     }
-    .template-option input[type="radio"] {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
+    .template-option:hover {
+      border-color: var(--primary-border);
+      background: var(--primary-light);
     }
     .template-option.active {
-      border-color: var(--blue);
-      background: var(--blue-light);
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 4px var(--primary-glow);
     }
+    .template-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+
+    .template-option::after {
+      content: '';
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 19px; height: 19px;
+      border-radius: 50%;
+      border: 2px solid var(--border-mid);
+      background: white;
+      transition: all var(--transition);
+    }
+    .template-option.active::after {
+      border-color: var(--primary);
+      background: var(--primary);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3.5L3.8 6.5L9 1' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 10px 8px;
+    }
+
+    .option-icon { font-size: 1.3rem; margin-bottom: 9px; display: block; }
     .template-option-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--gray-700);
-      margin-bottom: 4px;
+      font-weight: 700; font-size: 0.88rem; color: var(--text);
+      margin-bottom: 4px; padding-right: 26px; letter-spacing: -0.01em;
     }
-    .template-option-desc {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      line-height: 1.4;
-    }
-    .template-option.active .template-option-title { color: var(--blue); }
+    .template-option.active .template-option-title { color: var(--primary-dark); }
+    .template-option-desc { font-size: 0.77rem; color: var(--text-muted); line-height: 1.5; }
+    .template-option.active .template-option-desc { color: #5B51D8; }
 
     /* ── Characteristics ── */
-    .chars-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+    .chars-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; min-height: 32px; }
     .char-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--gray-100);
-      border: 1px solid var(--gray-200);
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--gray-700);
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 0.79rem; font-weight: 500; color: var(--text-mid);
     }
-    .char-tag.preset { background: var(--blue-light); border-color: #bee3f8; color: var(--blue); }
+    .char-tag.preset {
+      background: var(--primary-light);
+      border-color: var(--primary-border);
+      color: var(--primary-dark);
+    }
     .char-tag button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--gray-400);
-      font-size: 1rem;
-      line-height: 1;
-      padding: 0;
-      display: flex;
-      align-items: center;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-faint); font-size: 1rem; line-height: 1;
+      padding: 0; display: flex; align-items: center;
+      transition: color var(--transition);
     }
-    .char-tag button:hover { color: var(--red); }
+    .char-tag button:hover { color: var(--danger); }
 
-    .add-char-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .add-char-row { display: flex; gap: 8px; }
     .add-char-row input {
       flex: 1;
-      min-width: 180px;
-      padding: 8px 12px;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-family: inherit;
-      outline: none;
-      color: var(--gray-700);
+      padding: 9px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.87rem; font-family: inherit; outline: none;
+      color: var(--text); background: var(--surface);
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
-    .add-char-row input:focus { border-color: var(--blue); }
-    .add-char-row input::placeholder { color: var(--gray-400); }
+    .add-char-row input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .add-char-row input::placeholder { color: var(--text-faint); }
 
-    /* ── Textarea / input ── */
+    /* ── Textarea ── */
     textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px 12px;
-      font-size: 0.88rem;
-      font-family: monospace;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 8px;
-      resize: vertical;
-      outline: none;
-      color: var(--gray-700);
+      width: 100%; height: 110px;
+      padding: 11px 14px;
+      font-size: 0.87rem; font-family: inherit;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      resize: vertical; outline: none; color: var(--text); background: var(--surface);
+      line-height: 1.65;
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
-    textarea:focus { border-color: var(--blue); }
-    textarea::placeholder { color: var(--gray-400); font-family: inherit; }
+    textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    textarea::placeholder { color: var(--text-faint); }
+
+    /* ── Students input ── */
+    .students-input-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    .dropzone-label {
+      flex: 1; min-width: 190px;
+      border: 2px dashed var(--border-mid);
+      border-radius: var(--radius);
+      padding: 26px 16px;
+      text-align: center; cursor: pointer;
+      background: var(--surface-raised);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .dropzone-label:hover { border-color: var(--primary); background: var(--primary-light); }
+    .dropzone-icon { font-size: 1.8rem; }
+    .dropzone-title { font-weight: 600; font-size: 0.87rem; color: var(--text-mid); }
+    .dropzone-label:hover .dropzone-title { color: var(--primary-dark); }
+    .dropzone-hint { font-size: 0.74rem; color: var(--text-faint); }
+
+    .or-divider {
+      display: flex; align-items: center;
+      color: var(--text-faint); font-size: 0.77rem; font-weight: 600; letter-spacing: 0.06em;
+    }
+    .paste-area { flex: 2; min-width: 220px; }
+    .input-label {
+      display: block; font-size: 0.75rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 7px;
+    }
+
+    .csv-success {
+      display: none;
+      margin-bottom: 12px; font-size: 0.83rem;
+      color: var(--success); font-weight: 600;
+      background: var(--success-light);
+      border: 1px solid var(--success-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 13px;
+    }
 
     /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 18px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 9px 18px;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 0.87rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
       white-space: nowrap;
+      transition: all var(--transition);
+      letter-spacing: -0.01em;
     }
-    .btn-primary   { background: var(--blue);  color: white; }
-    .btn-primary:hover   { background: var(--blue-dark); }
-    .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
-    .btn-secondary:hover { background: var(--gray-200); }
-    .btn-success   { background: var(--green); color: white; }
-    .btn-success:hover   { background: #22543d; }
-    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(79,70,229,0.3); transform: translateY(-1px); }
+    .btn-primary:active { transform: none; }
 
-    .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-secondary { background: var(--bg); color: var(--text-mid); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); color: var(--text); }
+
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: var(--success-dark); box-shadow: 0 4px 12px rgba(5,150,105,0.3); transform: translateY(-1px); }
+    .btn-success:active { transform: none; }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.79rem; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; transform: none !important; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
     /* ── Grade grid ── */
+    .grade-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .grade-hint { font-size: 0.76rem; color: var(--text-faint); margin-bottom: 10px; }
+    .grade-hint kbd {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 5px;
+      font-family: inherit; font-size: 0.72rem; color: var(--text-mid);
+    }
+
     .grade-scroll-container {
-      max-height: 60vh;
-      overflow-x: auto;
-      overflow-y: auto;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      margin-top: 4px;
+      max-height: 60vh; overflow: auto;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: var(--surface);
     }
     .grade-char-header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      background: var(--gray-50);
-      border-bottom: 2px solid var(--gray-200);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center;
+      background: var(--surface-raised);
+      border-bottom: 1.5px solid var(--border);
+      box-shadow: 0 2px 8px rgba(15,23,42,0.06);
       min-width: max-content;
     }
     .gh-cell {
-      flex-shrink: 0;
-      padding: 9px 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--gray-600);
-      white-space: nowrap;
+      flex-shrink: 0; padding: 10px 12px;
+      font-size: 0.71rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted); white-space: nowrap;
     }
     .grade-student-row {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid var(--gray-200);
+      display: flex; align-items: center;
+      border-bottom: 1px solid var(--border);
       min-width: max-content;
+      transition: background var(--transition);
     }
     .grade-student-row:last-child { border-bottom: none; }
-    .grade-student-row:hover { background: var(--gray-50); }
+    .grade-student-row:hover { background: var(--bg); }
+
     .gs-check { width: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 8px 6px; }
-    .gs-name  { width: 200px; flex-shrink: 0; padding: 8px 12px; }
-    .gs-char  { width: 152px; flex-shrink: 0; padding: 8px 12px; }
-    .student-name-cell { font-weight: 600; color: var(--gray-700); }
-    .slider-wrap { display: flex; align-items: center; gap: 8px; }
+    .gs-name  { width: 200px; flex-shrink: 0; padding: 10px 12px; }
+    .gs-char  { width: 152px; flex-shrink: 0; padding: 10px 12px; }
+
+    .student-name-cell { font-weight: 600; color: var(--text); font-size: 0.88rem; }
+    .gender-row { display: flex; gap: 10px; margin-top: 5px; font-size: 0.73rem; color: var(--text-muted); }
+    .gender-row label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+
+    .slider-wrap { display: flex; align-items: center; gap: 10px; }
+
     input[type="range"] {
-      width: 90px;
-      accent-color: var(--blue);
-      cursor: pointer;
-      height: 4px;
+      -webkit-appearance: none; appearance: none;
+      width: 90px; height: 5px;
+      background: var(--border); border-radius: 3px;
+      outline: none; cursor: pointer; flex-shrink: 0;
     }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: var(--primary); cursor: pointer;
+      box-shadow: 0 1px 4px rgba(79,70,229,0.4);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(79,70,229,0.5);
+    }
+    input[type="range"] { --thumb: #4F46E5; --glow: rgba(79,70,229,0.2); }
+    input[type="range"][data-grade="1"] { --thumb: #DC2626; --glow: rgba(220,38,38,0.2); }
+    input[type="range"][data-grade="2"] { --thumb: #EA580C; --glow: rgba(234,88,12,0.2); }
+    input[type="range"][data-grade="3"] { --thumb: #4F46E5; --glow: rgba(79,70,229,0.2); }
+    input[type="range"][data-grade="4"] { --thumb: #9333EA; --glow: rgba(147,51,234,0.2); }
+    input[type="range"][data-grade="5"] { --thumb: #059669; --glow: rgba(5,150,105,0.2); }
+
+    input[type="range"]::-webkit-slider-thumb {
+      background: var(--thumb);
+      box-shadow: 0 1px 4px var(--glow);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 17px; height: 17px; border: none; border-radius: 50%;
+      background: var(--thumb); cursor: pointer;
+    }
+    input[type="range"]:focus { outline: none; }
+    input[type="range"]:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 4px var(--glow), 0 2px 8px var(--glow);
+      transform: scale(1.25);
+    }
+
+    .grade-badge[data-grade="1"] { background: #FEE2E2; color: #DC2626; }
+    .grade-badge[data-grade="2"] { background: #FFEDD5; color: #EA580C; }
+    .grade-badge[data-grade="3"] { background: var(--primary-light); color: var(--primary-dark); }
+    .grade-badge[data-grade="4"] { background: #F3E8FF; color: #9333EA; }
+    .grade-badge[data-grade="5"] { background: #D1FAE5; color: #059669; }
+
+    .gs-char:focus-within {
+      background: color-mix(in srgb, var(--primary-light) 60%, white);
+      border-radius: var(--radius-sm);
+    }
+    .gs-char:focus-within .grade-badge { filter: brightness(0.85) saturate(1.3); }
+    .grade-student-row:focus-within { background: var(--primary-light); }
+
     .grade-badge {
-      min-width: 22px;
-      text-align: center;
-      font-weight: 700;
-      font-size: 0.82rem;
-      color: var(--blue);
+      min-width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; font-weight: 700; font-size: 0.8rem;
+      background: var(--primary-light); color: var(--primary-dark);
     }
 
     /* ── Generate bar ── */
     .generate-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding: 16px 24px;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 16px; flex-wrap: wrap;
+      padding: 18px 24px;
+      background: white;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-lg);
       margin-bottom: 24px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow), 0 0 0 4px var(--primary-glow);
     }
-    .generate-bar p { font-size: 0.88rem; color: var(--gray-600); }
-    .generate-bar strong { color: var(--gray-700); }
+    .gen-bar-label { font-size: 0.72rem; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+    .gen-bar-text { font-size: 0.9rem; color: var(--text-muted); }
+    .gen-bar-text strong { color: var(--primary); font-size: 1.05rem; }
 
     /* ── Reports ── */
-    .reports-section h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--gray-700);
-      margin-bottom: 14px;
+    .reports-heading {
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      letter-spacing: -0.01em; margin-bottom: 14px;
     }
     .report-card {
       background: white;
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px; margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow var(--transition);
     }
-    .report-card.error-card { border-color: #fc8181; }
-    .report-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .report-name { font-size: 1rem; font-weight: 700; color: var(--gray-700); }
-    .status-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 99px;
-    }
-    .badge-loading { background: var(--blue-light); color: var(--blue); }
-    .badge-done    { background: var(--green-light); color: var(--green); }
-    .badge-error   { background: var(--red-light); color: var(--red); }
+    .report-card:hover { box-shadow: var(--shadow); }
+    .report-card.error-card { border-color: var(--danger-border); background: var(--danger-light); }
 
-    .grades-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
+    .report-header {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 14px; flex-wrap: wrap;
     }
+    .report-name { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 4px 10px; border-radius: 99px;
+    }
+    .badge-loading { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
+    .badge-done    { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+    .badge-error   { background: var(--danger-light);  color: var(--danger);  border: 1px solid var(--danger-border); }
+
+    .grades-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
     .grade-pill {
-      background: var(--gray-100);
-      border: 1px solid var(--gray-200);
-      border-radius: 5px;
-      padding: 3px 9px;
-      font-size: 0.76rem;
-      color: var(--gray-600);
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 3px 10px;
+      font-size: 0.74rem; color: var(--text-muted); font-weight: 500;
     }
-    .grade-pill b { color: var(--blue); }
+    .grade-pill b { color: var(--primary); font-weight: 700; }
 
     .report-text {
-      font-size: 0.92rem;
-      line-height: 1.75;
-      color: var(--gray-700);
-      background: var(--gray-50);
-      border-left: 3px solid var(--blue);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 12px;
+      font-size: 0.93rem; line-height: 1.85; color: var(--text-mid);
+      background: var(--bg);
+      border-left: 3px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 14px;
     }
-    .error-msg { font-size: 0.88rem; color: var(--red); padding: 8px 0; }
+    .error-msg { font-size: 0.87rem; color: var(--danger); padding: 4px 0 10px; }
 
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 20px;
+      animation: fadeIn 200ms ease;
+    }
+    .modal-overlay.hiding { animation: fadeOut 180ms ease forwards; }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+    .modal-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 36px 32px 28px;
+      max-width: 420px; width: 100%;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.18);
+      text-align: center;
+      animation: slideUp 220ms cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+    .modal-emoji { font-size: 3rem; margin-bottom: 14px; display: block; }
+    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 12px; letter-spacing: -0.02em; }
+    .modal-body  { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+    .modal-body em { color: var(--text-mid); font-style: normal; font-weight: 500; }
+
+    /* ── Spinner ── */
     .spinner {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border: 2px solid #bee3f8;
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      display: inline-block; width: 11px; height: 11px;
+      border: 2px solid var(--primary-border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 640px) {
-      header { padding: 14px 16px; }
-      .container { padding: 16px 12px 48px; }
-      .step { padding: 16px; }
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .header-inner { padding: 20px 16px 18px; }
+      .header-badge { display: none; }
+      .container { padding: 18px 12px 60px; }
+      .step { padding: 20px 16px; }
+      .option-grid-3, .option-grid-2 { grid-template-columns: 1fr; }
+      .students-input-row { flex-direction: column; }
+      .generate-bar { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 440px) {
+      .header-icon { display: none; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Student Report Generator</h1>
-  <p>Powered by Pixies</p>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-icon">📋</div>
+      <div class="header-text">
+        <h1>Student Report Generator</h1>
+        <p>Create professional, personalised reports in seconds</p>
+      </div>
+    </div>
+    <div class="header-badge">Powered by Pixies</div>
+  </div>
 </header>
 
 <div class="container">
 
   <!-- STEP 1: Timing -->
   <div class="step">
-    <div class="step-label">Step 1</div>
-    <h2>When is this report?</h2>
-    <div class="template-options">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-title">When is this report?</div>
+    </div>
+    <div class="option-grid option-grid-3">
       <label class="template-option" id="opt-beginning" onclick="setTiming('beginning-of-year')">
         <input type="radio" name="timing" value="beginning-of-year">
+        <span class="option-icon">🌱</span>
         <div class="template-option-title">Beginning of year</div>
         <div class="template-option-desc">Early observations, settling in, first impressions.</div>
       </label>
       <label class="template-option" id="opt-midyear" onclick="setTiming('mid-year')">
         <input type="radio" name="timing" value="mid-year">
+        <span class="option-icon">📈</span>
         <div class="template-option-title">Mid-year</div>
         <div class="template-option-desc">Progress so far, building on foundations, areas to develop.</div>
       </label>
       <label class="template-option active" id="opt-endofyear" onclick="setTiming('end-of-year')">
         <input type="radio" name="timing" value="end-of-year" checked>
+        <span class="option-icon">🎓</span>
         <div class="template-option-title">End of year</div>
         <div class="template-option-desc">Reflecting on the year, celebrating growth, looking ahead.</div>
       </label>
@@ -387,16 +567,20 @@
 
   <!-- STEP 2: Template -->
   <div class="step">
-    <div class="step-label">Step 2</div>
-    <h2>Choose a report template</h2>
-    <div class="template-options">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-title">Choose a report template</div>
+    </div>
+    <div class="option-grid option-grid-2">
       <label class="template-option active" id="opt-formtutor" onclick="setTemplate('formtutor')">
         <input type="radio" name="template" value="formtutor" checked>
+        <span class="option-icon">👥</span>
         <div class="template-option-title">Form Tutor Report</div>
         <div class="template-option-desc">Holistic, developmental language. Focus on pastoral care and character.</div>
       </label>
       <label class="template-option" id="opt-physics" onclick="setTemplate('physics')">
         <input type="radio" name="template" value="physics">
+        <span class="option-icon">⚗️</span>
         <div class="template-option-title">Physics Report</div>
         <div class="template-option-desc">Academic, technical language. Focus on analytical and practical skills.</div>
       </label>
@@ -405,8 +589,10 @@
 
   <!-- STEP 3: Characteristics -->
   <div class="step">
-    <div class="step-label">Step 3</div>
-    <h2>Characteristics</h2>
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-title">Characteristics</div>
+    </div>
     <div class="chars-list" id="chars-list"></div>
     <div class="add-char-row">
       <input type="text" id="new-char-input" placeholder="Add custom characteristic…" maxlength="60"
@@ -417,49 +603,46 @@
 
   <!-- STEP 4: Students -->
   <div class="step">
-    <div class="step-label">Step 4</div>
-    <h2>Add student names</h2>
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-title">Add student names</div>
+    </div>
 
-    <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px">
-      <!-- Upload option -->
-      <label style="flex:1; min-width:200px; border:2px dashed var(--gray-200); border-radius:var(--radius);
-                    padding:16px; text-align:center; cursor:pointer; color:var(--gray-600); font-size:0.88rem"
-             id="csv-drop" onmouseenter="this.style.borderColor='var(--blue)'"
-             onmouseleave="this.style.borderColor='var(--gray-200)'">
+    <div class="students-input-row">
+      <label class="dropzone-label" id="csv-drop">
         <input type="file" accept=".csv,.txt" id="csv-input" style="display:none" onchange="handleCSV(this)">
-        <div style="font-size:1.6rem; margin-bottom:6px">📂</div>
-        <strong>Upload CSV or TXT</strong><br>
-        <span style="font-size:0.78rem; color:var(--gray-400)">First column used as names</span>
+        <span class="dropzone-icon">📂</span>
+        <span class="dropzone-title">Upload CSV or TXT</span>
+        <span class="dropzone-hint">First column used as names</span>
       </label>
 
-      <!-- Divider -->
-      <div style="display:flex; align-items:center; color:var(--gray-400); font-size:0.8rem; font-weight:600">OR</div>
+      <div class="or-divider">OR</div>
 
-      <!-- Paste option -->
-      <div style="flex:2; min-width:220px">
+      <div class="paste-area">
+        <label class="input-label" for="names-input">Paste names</label>
         <textarea id="names-input" placeholder="Alice Johnson&#10;Bob Smith&#10;Carol Williams&#10;(one per line)"></textarea>
       </div>
     </div>
 
-    <div id="csv-preview" style="display:none; margin-bottom:10px; font-size:0.82rem; color:var(--green); font-weight:600"></div>
+    <div class="csv-success" id="csv-preview"></div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="loadStudents()">Load students</button>
+      <button class="btn btn-primary" onclick="loadStudents()">Load students →</button>
       <button class="btn btn-secondary btn-sm" onclick="clearInput()">Clear</button>
     </div>
   </div>
 
   <!-- STEP 5: Grade grid -->
   <div class="step" id="grade-step" style="display:none">
-    <div class="step-label">Step 5</div>
-    <h2>Set grades</h2>
-    <div class="btn-row" style="margin-bottom:12px; margin-top:0">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div class="step-title">Set grades</div>
+    </div>
+    <div class="grade-controls">
       <button class="btn btn-secondary btn-sm" onclick="selectAllStudents(true)">Select all</button>
       <button class="btn btn-secondary btn-sm" onclick="selectAllStudents(false)">Deselect all</button>
     </div>
-    <p style="font-size:0.78rem;color:var(--gray-400);margin-bottom:8px">
-      Tip: Press <strong style="color:var(--gray-600)">1–5</strong> to grade, <strong style="color:var(--gray-600)">Tab</strong> to move.
-    </p>
+    <p class="grade-hint">Press <kbd>1</kbd>–<kbd>5</kbd> to grade, <kbd>Tab</kbd> to move between cells.</p>
     <div class="grade-scroll-container" id="grade-scroll-container">
       <div class="grade-char-header" id="grade-char-header"></div>
       <div id="grade-tbody"></div>
@@ -468,20 +651,21 @@
 
   <!-- Generate bar -->
   <div class="generate-bar" id="generate-bar" style="display:none">
-    <p><strong id="sel-count">0</strong> student(s) selected</p>
-    <button class="btn btn-success" id="gen-btn" onclick="generateReports()">
+    <div>
+      <div class="gen-bar-label">Ready to generate</div>
+      <div class="gen-bar-text"><strong id="sel-count">0</strong> student(s) selected</div>
+    </div>
+    <button class="btn btn-success" id="gen-btn" onclick="generateReports()" style="padding:11px 26px;font-size:0.93rem">
       ✦ Generate reports
     </button>
   </div>
 
   <!-- Reports -->
   <div id="reports-section" style="display:none">
-    <div class="reports-section">
-      <h2>Generated Reports</h2>
-      <div id="reports-list"></div>
-      <div id="csv-download-row" style="display:none; margin-top:16px;">
-        <button class="btn btn-success" onclick="downloadCSV()">&#8595; Download as CSV</button>
-      </div>
+    <div class="reports-heading">Generated Reports</div>
+    <div id="reports-list"></div>
+    <div id="csv-download-row" style="display:none; margin-top:16px;">
+      <button class="btn btn-success" onclick="downloadCSV()">↓ Download all as CSV</button>
     </div>
   </div>
 
@@ -505,7 +689,7 @@ const TEMPLATES = {
 let currentTemplate    = 'formtutor';
 let currentTiming      = 'end-of-year';
 let customChars        = [];
-let students           = [];   // [{ name, selected, grades: { char: 1-5 } }]
+let students           = [];
 let generatedStudents  = [];
 
 // ── Timing ────────────────────────────────────────────────────────────────────
@@ -608,13 +792,11 @@ function renderTable() {
   const header = document.getElementById('grade-char-header');
   const tbody  = document.getElementById('grade-tbody');
 
-  // Sticky characteristic header
   header.innerHTML =
     `<div class="gh-cell" style="width:44px;flex-shrink:0"></div>` +
     `<div class="gh-cell" style="width:200px;flex-shrink:0">Student</div>` +
     chars.map(c => `<div class="gh-cell" style="width:152px">${esc(c)}</div>`).join('');
 
-  // Student rows
   tbody.innerHTML = '';
   students.forEach((s, si) => {
     const row = document.createElement('div');
@@ -624,20 +806,20 @@ function renderTable() {
       <div class="gs-check">
         <input type="checkbox" ${s.selected ? 'checked' : ''}
           onchange="toggleStudent(${si}, this.checked)"
-          style="accent-color:var(--blue);width:15px;height:15px;cursor:pointer">
+          style="accent-color:var(--primary);width:15px;height:15px;cursor:pointer">
       </div>
       <div class="gs-name">
         <div class="student-name-cell">${esc(s.name)}</div>
-        <div style="margin-top:5px;display:flex;gap:10px;font-size:0.75rem;color:var(--gray-600)">
-          <label style="cursor:pointer;display:flex;align-items:center;gap:3px">
+        <div class="gender-row">
+          <label>
             <input type="radio" name="g${si}" value="he/him" ${s.gender==='he/him'?'checked':''}
               onchange="students[${si}].gender=this.value"
-              style="accent-color:var(--blue);cursor:pointer"> M
+              style="accent-color:var(--primary);cursor:pointer"> M
           </label>
-          <label style="cursor:pointer;display:flex;align-items:center;gap:3px">
+          <label>
             <input type="radio" name="g${si}" value="she/her" ${s.gender==='she/her'?'checked':''}
               onchange="students[${si}].gender=this.value"
-              style="accent-color:var(--blue);cursor:pointer"> F
+              style="accent-color:var(--primary);cursor:pointer"> F
           </label>
         </div>
       </div>
@@ -645,10 +827,10 @@ function renderTable() {
         <div class="gs-char">
           <div class="slider-wrap">
             <input type="range" min="1" max="5" value="${s.grades[c]}"
-              data-si="${si}" data-char="${encodeURIComponent(c)}"
-              oninput="updateGrade(${si},'${esc(c)}',+this.value)"
+              data-si="${si}" data-char="${encodeURIComponent(c)}" data-grade="${s.grades[c]}"
+              oninput="this.dataset.grade=this.value; updateGrade(${si},'${esc(c)}',+this.value)"
               onkeydown="handleSliderKey(event)">
-            <span class="grade-badge" id="gb-${si}-${slugify(c)}">${s.grades[c]}</span>
+            <span class="grade-badge" id="gb-${si}-${slugify(c)}" data-grade="${s.grades[c]}">${s.grades[c]}</span>
           </div>
         </div>`).join('')}
     `;
@@ -658,7 +840,9 @@ function renderTable() {
 
 function updateGrade(si, char, val) {
   students[si].grades[char] = val;
-  document.getElementById(`gb-${si}-${slugify(char)}`).textContent = val;
+  const badge = document.getElementById(`gb-${si}-${slugify(char)}`);
+  badge.textContent = val;
+  badge.dataset.grade = val;
 }
 
 function toggleStudent(si, checked) {
@@ -694,7 +878,6 @@ async function generateReports() {
 
   generatedStudents = [...selected];
 
-  // Pre-create loading cards
   selected.forEach(s => {
     list.insertAdjacentHTML('beforeend', `
       <div class="report-card" id="rc-${slugify(s.name)}">
@@ -718,6 +901,33 @@ async function generateReports() {
   document.getElementById('gen-btn').disabled = false;
   updateSelCount();
   document.getElementById('csv-download-row').style.display = 'flex';
+  showBeerModal();
+}
+
+function showBeerModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <span class="modal-emoji">🍺</span>
+      <div class="modal-title">Your reports are ready!</div>
+      <div class="modal-body">
+        The creator of this tool really doesn't need any thanks at all —
+        it was a pleasure.<br><br>
+        That said, <em>if you happen to be passing an off licence this weekend</em>,
+        a cold beer would not go unappreciated. Just saying.
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeBeerModal(this)">
+        Thanks, I'll bear that in mind 🍻
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeBeerModal(btn) {
+  const overlay = btn.closest('.modal-overlay');
+  overlay.classList.add('hiding');
+  overlay.addEventListener('animationend', () => overlay.remove());
 }
 
 async function generateOne(student) {
@@ -757,7 +967,7 @@ async function generateOne(student) {
       <div class="report-text" id="rt-${id}">${esc(report)}</div>
       <div class="btn-row" style="margin-top:0">
         <button class="btn btn-secondary btn-sm" onclick="copyReport('${id}', this)">Copy report</button>
-        <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">&#8635; Regenerate</button>
+        <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">↻ Regenerate</button>
       </div>`;
   } catch (err) {
     cardEl.className = 'report-card error-card';
@@ -767,9 +977,7 @@ async function generateOne(student) {
         <span class="status-badge badge-error">✗ Failed</span>
       </div>
       <p class="error-msg">${esc(err.message)}</p>
-      <button class="btn btn-secondary btn-sm" onclick="retryOne('${esc(student.name)}')">
-        Retry
-      </button>`;
+      <button class="btn btn-secondary btn-sm" onclick="retryOne('${esc(student.name)}')">Retry</button>`;
   }
 }
 
@@ -814,7 +1022,7 @@ async function regenerateOne(name) {
     if (textEl) textEl.innerHTML = esc(report);
     if (badge) { badge.className = 'status-badge badge-done'; badge.textContent = '✓ Done'; }
   } catch (err) {
-    if (textEl) textEl.innerHTML = `<span style="color:var(--red);font-size:0.88rem">${esc(err.message)}</span>`;
+    if (textEl) textEl.innerHTML = `<span style="color:var(--danger);font-size:0.88rem">${esc(err.message)}</span>`;
     if (badge) { badge.className = 'status-badge badge-error'; badge.textContent = '✗ Failed'; }
   } finally {
     btns.forEach(b => { b.disabled = false; });
@@ -871,12 +1079,10 @@ function handleSliderKey(e) {
     e.target.dispatchEvent(new Event('input', { bubbles: true }));
     const next = sliders[idx + 1];
     if (next) next.focus();
-
   } else if (e.key === 'Tab' && !e.shiftKey) {
     e.preventDefault();
     const next = sliders[idx + 1];
     if (next) next.focus();
-
   } else if (e.key === 'Tab' && e.shiftKey) {
     e.preventDefault();
     const prev = sliders[idx - 1];
@@ -905,18 +1111,15 @@ function handleCSV(input) {
       .map(l => l.split(',')[0].replace(/^["']|["']$/g, '').trim())
       .filter(Boolean);
 
-    // Drop a header row if the first line looks like a label (no spaces, all alpha)
     const names = /^(name|student|pupil|first)$/i.test(lines[0]) ? lines.slice(1) : lines;
 
     if (!names.length) { alert('No names found in file.'); return; }
 
-    // Show names in the textarea so the user can review/edit before loading
     document.getElementById('names-input').value = names.join('\n');
     document.getElementById('csv-preview').style.display = 'block';
     document.getElementById('csv-preview').textContent =
       `✓ ${names.length} name${names.length !== 1 ? 's' : ''} loaded from ${file.name}`;
 
-    // Reset input so the same file can be re-uploaded if needed
     input.value = '';
   };
   reader.readAsText(file);
