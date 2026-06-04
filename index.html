@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Report Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:       #2b6cb0;
+      --blue-dark:  #2c5282;
+      --blue-light: #ebf8ff;
+      --green:      #276749;
+      --green-light:#f0fff4;
+      --red:        #c53030;
+      --red-light:  #fff5f5;
+      --gray-50:    #f7fafc;
+      --gray-100:   #edf2f7;
+      --gray-200:   #e2e8f0;
+      --gray-400:   #a0aec0;
+      --gray-600:   #4a5568;
+      --gray-700:   #2d3748;
+      --gray-900:   #1a202c;
+      --radius:     10px;
+      --shadow:     0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      color: var(--gray-900);
+      min-height: 100vh;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--blue);
+      color: white;
+      padding: 18px 32px;
+    }
+    header h1 { font-size: 1.3rem; font-weight: 700; }
+    header p  { font-size: 0.82rem; opacity: 0.75; margin-top: 2px; }
+
+    /* ── Layout ── */
+    .container { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    .step {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+    .step h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 16px;
+    }
+
+    /* ── Template picker ── */
+    .template-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .template-option {
+      flex: 1;
+      min-width: 200px;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      cursor: pointer;
+      position: relative;
+    }
+    .template-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .template-option.active {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+    .template-option-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      margin-bottom: 4px;
+    }
+    .template-option-desc {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      line-height: 1.4;
+    }
+    .template-option.active .template-option-title { color: var(--blue); }
+
+    /* ── Characteristics ── */
+    .chars-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .char-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+    .char-tag.preset { background: var(--blue-light); border-color: #bee3f8; color: var(--blue); }
+    .char-tag button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-400);
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+    .char-tag button:hover { color: var(--red); }
+
+    .add-char-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .add-char-row input {
+      flex: 1;
+      min-width: 180px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      color: var(--gray-700);
+    }
+    .add-char-row input:focus { border-color: var(--blue); }
+    .add-char-row input::placeholder { color: var(--gray-400); }
+
+    /* ── Textarea / input ── */
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      font-family: monospace;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      resize: vertical;
+      outline: none;
+      color: var(--gray-700);
+    }
+    textarea:focus { border-color: var(--blue); }
+    textarea::placeholder { color: var(--gray-400); font-family: inherit; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-primary   { background: var(--blue);  color: white; }
+    .btn-primary:hover   { background: var(--blue-dark); }
+    .btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn-success   { background: var(--green); color: white; }
+    .btn-success:hover   { background: #22543d; }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+
+    /* ── Grade grid ── */
+    .grade-scroll-container {
+      max-height: 60vh;
+      overflow-x: auto;
+      overflow-y: auto;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-top: 4px;
+    }
+    .grade-char-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      background: var(--gray-50);
+      border-bottom: 2px solid var(--gray-200);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      min-width: max-content;
+    }
+    .gh-cell {
+      flex-shrink: 0;
+      padding: 9px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-600);
+      white-space: nowrap;
+    }
+    .grade-student-row {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--gray-200);
+      min-width: max-content;
+    }
+    .grade-student-row:last-child { border-bottom: none; }
+    .grade-student-row:hover { background: var(--gray-50); }
+    .gs-check { width: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 8px 6px; }
+    .gs-name  { width: 200px; flex-shrink: 0; padding: 8px 12px; }
+    .gs-char  { width: 152px; flex-shrink: 0; padding: 8px 12px; }
+    .student-name-cell { font-weight: 600; color: var(--gray-700); }
+    .slider-wrap { display: flex; align-items: center; gap: 8px; }
+    input[type="range"] {
+      width: 90px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      height: 4px;
+    }
+    .grade-badge {
+      min-width: 22px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--blue);
+    }
+
+    /* ── Generate bar ── */
+    .generate-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 24px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .generate-bar p { font-size: 0.88rem; color: var(--gray-600); }
+    .generate-bar strong { color: var(--gray-700); }
+
+    /* ── Reports ── */
+    .reports-section h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 14px;
+    }
+    .report-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .report-card.error-card { border-color: #fc8181; }
+    .report-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .report-name { font-size: 1rem; font-weight: 700; color: var(--gray-700); }
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .badge-loading { background: var(--blue-light); color: var(--blue); }
+    .badge-done    { background: var(--green-light); color: var(--green); }
+    .badge-error   { background: var(--red-light); color: var(--red); }
+
+    .grades-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .grade-pill {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 5px;
+      padding: 3px 9px;
+      font-size: 0.76rem;
+      color: var(--gray-600);
+    }
+    .grade-pill b { color: var(--blue); }
+
+    .report-text {
+      font-size: 0.92rem;
+      line-height: 1.75;
+      color: var(--gray-700);
+      background: var(--gray-50);
+      border-left: 3px solid var(--blue);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 12px;
+    }
+    .error-msg { font-size: 0.88rem; color: var(--red); padding: 8px 0; }
+
+    .spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 2px solid #bee3f8;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      header { padding: 14px 16px; }
+      .container { padding: 16px 12px 48px; }
+      .step { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Student Report Generator</h1>
+  <p>Powered by Claude AI</p>
+</header>
+
+<div class="container">
+
+  <!-- STEP 1: Timing -->
+  <div class="step">
+    <div class="step-label">Step 1</div>
+    <h2>When is this report?</h2>
+    <div class="template-options">
+      <label class="template-option" id="opt-beginning" onclick="setTiming('beginning-of-year')">
+        <input type="radio" name="timing" value="beginning-of-year">
+        <div class="template-option-title">Beginning of year</div>
+        <div class="template-option-desc">Early observations, settling in, first impressions.</div>
+      </label>
+      <label class="template-option" id="opt-midyear" onclick="setTiming('mid-year')">
+        <input type="radio" name="timing" value="mid-year">
+        <div class="template-option-title">Mid-year</div>
+        <div class="template-option-desc">Progress so far, building on foundations, areas to develop.</div>
+      </label>
+      <label class="template-option active" id="opt-endofyear" onclick="setTiming('end-of-year')">
+        <input type="radio" name="timing" value="end-of-year" checked>
+        <div class="template-option-title">End of year</div>
+        <div class="template-option-desc">Reflecting on the year, celebrating growth, looking ahead.</div>
+      </label>
+    </div>
+  </div>
+
+  <!-- STEP 2: Template -->
+  <div class="step">
+    <div class="step-label">Step 2</div>
+    <h2>Choose a report template</h2>
+    <div class="template-options">
+      <label class="template-option active" id="opt-physics" onclick="setTemplate('physics')">
+        <input type="radio" name="template" value="physics" checked>
+        <div class="template-option-title">Physics Report</div>
+        <div class="template-option-desc">Academic, technical language. Focus on analytical and practical skills.</div>
+      </label>
+      <label class="template-option" id="opt-formtutor" onclick="setTemplate('formtutor')">
+        <input type="radio" name="template" value="formtutor">
+        <div class="template-option-title">Form Tutor Report</div>
+        <div class="template-option-desc">Holistic, developmental language. Focus on pastoral care and character.</div>
+      </label>
+    </div>
+  </div>
+
+  <!-- STEP 3: Characteristics -->
+  <div class="step">
+    <div class="step-label">Step 3</div>
+    <h2>Characteristics</h2>
+    <div class="chars-list" id="chars-list"></div>
+    <div class="add-char-row">
+      <input type="text" id="new-char-input" placeholder="Add custom characteristic…" maxlength="60"
+        onkeydown="if(event.key==='Enter') addChar()">
+      <button class="btn btn-secondary" onclick="addChar()">+ Add</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Students -->
+  <div class="step">
+    <div class="step-label">Step 4</div>
+    <h2>Add student names</h2>
+
+    <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px">
+      <!-- Upload option -->
+      <label style="flex:1; min-width:200px; border:2px dashed var(--gray-200); border-radius:var(--radius);
+                    padding:16px; text-align:center; cursor:pointer; color:var(--gray-600); font-size:0.88rem"
+             id="csv-drop" onmouseenter="this.style.borderColor='var(--blue)'"
+             onmouseleave="this.style.borderColor='var(--gray-200)'">
+        <input type="file" accept=".csv,.txt" id="csv-input" style="display:none" onchange="handleCSV(this)">
+        <div style="font-size:1.6rem; margin-bottom:6px">📂</div>
+        <strong>Upload CSV or TXT</strong><br>
+        <span style="font-size:0.78rem; color:var(--gray-400)">First column used as names</span>
+      </label>
+
+      <!-- Divider -->
+      <div style="display:flex; align-items:center; color:var(--gray-400); font-size:0.8rem; font-weight:600">OR</div>
+
+      <!-- Paste option -->
+      <div style="flex:2; min-width:220px">
+        <textarea id="names-input" placeholder="Alice Johnson&#10;Bob Smith&#10;Carol Williams&#10;(one per line)"></textarea>
+      </div>
+    </div>
+
+    <div id="csv-preview" style="display:none; margin-bottom:10px; font-size:0.82rem; color:var(--green); font-weight:600"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="loadStudents()">Load students</button>
+      <button class="btn btn-secondary btn-sm" onclick="clearInput()">Clear</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Grade grid -->
+  <div class="step" id="grade-step" style="display:none">
+    <div class="step-label">Step 5</div>
+    <h2>Set grades</h2>
+    <div class="btn-row" style="margin-bottom:12px; margin-top:0">
+      <button class="btn btn-secondary btn-sm" onclick="selectAllStudents(true)">Select all</button>
+      <button class="btn btn-secondary btn-sm" onclick="selectAllStudents(false)">Deselect all</button>
+    </div>
+    <p style="font-size:0.78rem;color:var(--gray-400);margin-bottom:8px">
+      Tip: Press <strong style="color:var(--gray-600)">1–5</strong> to grade, <strong style="color:var(--gray-600)">Tab</strong> to move.
+    </p>
+    <div class="grade-scroll-container" id="grade-scroll-container">
+      <div class="grade-char-header" id="grade-char-header"></div>
+      <div id="grade-tbody"></div>
+    </div>
+  </div>
+
+  <!-- Generate bar -->
+  <div class="generate-bar" id="generate-bar" style="display:none">
+    <p><strong id="sel-count">0</strong> student(s) selected</p>
+    <button class="btn btn-success" id="gen-btn" onclick="generateReports()">
+      ✦ Generate reports
+    </button>
+  </div>
+
+  <!-- Reports -->
+  <div id="reports-section" style="display:none">
+    <div class="reports-section">
+      <h2>Generated Reports</h2>
+      <div id="reports-list"></div>
+      <div id="csv-download-row" style="display:none; margin-top:16px;">
+        <button class="btn btn-success" onclick="downloadCSV()">&#8595; Download as CSV</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_URL = 'https://YOUR-APP-NAME.up.railway.app';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const TEMPLATES = {
+  physics: {
+    label: 'Physics',
+    chars: ['Analytical thinking', 'Practical skills', 'Communication', 'Problem-solving', 'Collaboration', 'Engagement'],
+  },
+  formtutor: {
+    label: 'Form Tutor',
+    chars: ['Attendance', 'Behaviour', 'Punctuality', 'Relationships', 'Wellbeing'],
+  },
+};
+
+let currentTemplate    = 'physics';
+let currentTiming      = 'end-of-year';
+let customChars        = [];
+let students           = [];   // [{ name, selected, grades: { char: 1-5 } }]
+let generatedStudents  = [];
+
+// ── Timing ────────────────────────────────────────────────────────────────────
+function setTiming(t) {
+  currentTiming = t;
+  ['beginning', 'midyear', 'endofyear'].forEach(id =>
+    document.getElementById(`opt-${id}`).classList.remove('active'));
+  const idMap = { 'beginning-of-year': 'beginning', 'mid-year': 'midyear', 'end-of-year': 'endofyear' };
+  document.getElementById(`opt-${idMap[t]}`).classList.add('active');
+}
+
+// ── Template ──────────────────────────────────────────────────────────────────
+function setTemplate(t) {
+  currentTemplate = t;
+  document.getElementById('opt-physics').classList.toggle('active', t === 'physics');
+  document.getElementById('opt-formtutor').classList.toggle('active', t === 'formtutor');
+  customChars = [];
+  renderChars();
+  if (students.length) rebuildGrades();
+}
+
+function allChars() {
+  return [...TEMPLATES[currentTemplate].chars, ...customChars];
+}
+
+// ── Characteristics ───────────────────────────────────────────────────────────
+function renderChars() {
+  const list = document.getElementById('chars-list');
+  list.innerHTML = '';
+
+  TEMPLATES[currentTemplate].chars.forEach(c => {
+    const tag = document.createElement('span');
+    tag.className = 'char-tag preset';
+    tag.textContent = c;
+    list.appendChild(tag);
+  });
+
+  customChars.forEach((c, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'char-tag';
+    tag.innerHTML = `${esc(c)} <button onclick="removeChar(${i})" title="Remove">×</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function addChar() {
+  const inp = document.getElementById('new-char-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (allChars().some(c => c.toLowerCase() === val.toLowerCase())) {
+    inp.value = ''; return;
+  }
+  customChars.push(val);
+  inp.value = '';
+  renderChars();
+  if (students.length) rebuildGrades();
+}
+
+function removeChar(i) {
+  customChars.splice(i, 1);
+  renderChars();
+  if (students.length) rebuildGrades();
+}
+
+// ── Load students ─────────────────────────────────────────────────────────────
+function loadStudents() {
+  const names = document.getElementById('names-input').value
+    .split('\n').map(s => s.trim()).filter(Boolean);
+
+  if (!names.length) { alert('Please enter at least one name.'); return; }
+
+  const chars = allChars();
+  students = names.map(name => ({
+    name,
+    selected: true,
+    gender:   'he/him',
+    grades:   Object.fromEntries(chars.map(c => [c, 3])),
+  }));
+
+  renderTable();
+  document.getElementById('grade-step').style.display = 'block';
+  document.getElementById('generate-bar').style.display = 'flex';
+  updateSelCount();
+  document.getElementById('grade-step').scrollIntoView({ behavior: 'smooth' });
+}
+
+function rebuildGrades() {
+  const chars = allChars();
+  students.forEach(s => {
+    const fresh = {};
+    chars.forEach(c => { fresh[c] = s.grades[c] ?? 3; });
+    s.grades = fresh;
+  });
+  renderTable();
+}
+
+// ── Grade grid ────────────────────────────────────────────────────────────────
+function renderTable() {
+  const chars = allChars();
+  const header = document.getElementById('grade-char-header');
+  const tbody  = document.getElementById('grade-tbody');
+
+  // Sticky characteristic header
+  header.innerHTML =
+    `<div class="gh-cell" style="width:44px;flex-shrink:0"></div>` +
+    `<div class="gh-cell" style="width:200px;flex-shrink:0">Student</div>` +
+    chars.map(c => `<div class="gh-cell" style="width:152px">${esc(c)}</div>`).join('');
+
+  // Student rows
+  tbody.innerHTML = '';
+  students.forEach((s, si) => {
+    const row = document.createElement('div');
+    row.className = 'grade-student-row';
+    row.id = `row-${si}`;
+    row.innerHTML = `
+      <div class="gs-check">
+        <input type="checkbox" ${s.selected ? 'checked' : ''}
+          onchange="toggleStudent(${si}, this.checked)"
+          style="accent-color:var(--blue);width:15px;height:15px;cursor:pointer">
+      </div>
+      <div class="gs-name">
+        <div class="student-name-cell">${esc(s.name)}</div>
+        <div style="margin-top:5px;display:flex;gap:10px;font-size:0.75rem;color:var(--gray-600)">
+          <label style="cursor:pointer;display:flex;align-items:center;gap:3px">
+            <input type="radio" name="g${si}" value="he/him" ${s.gender==='he/him'?'checked':''}
+              onchange="students[${si}].gender=this.value"
+              style="accent-color:var(--blue);cursor:pointer"> M
+          </label>
+          <label style="cursor:pointer;display:flex;align-items:center;gap:3px">
+            <input type="radio" name="g${si}" value="she/her" ${s.gender==='she/her'?'checked':''}
+              onchange="students[${si}].gender=this.value"
+              style="accent-color:var(--blue);cursor:pointer"> F
+          </label>
+        </div>
+      </div>
+      ${chars.map(c => `
+        <div class="gs-char">
+          <div class="slider-wrap">
+            <input type="range" min="1" max="5" value="${s.grades[c]}"
+              data-si="${si}" data-char="${encodeURIComponent(c)}"
+              oninput="updateGrade(${si},'${esc(c)}',+this.value)"
+              onkeydown="handleSliderKey(event)">
+            <span class="grade-badge" id="gb-${si}-${slugify(c)}">${s.grades[c]}</span>
+          </div>
+        </div>`).join('')}
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateGrade(si, char, val) {
+  students[si].grades[char] = val;
+  document.getElementById(`gb-${si}-${slugify(char)}`).textContent = val;
+}
+
+function toggleStudent(si, checked) {
+  students[si].selected = checked;
+  updateSelCount();
+}
+
+function selectAllStudents(state) {
+  students.forEach((s, i) => {
+    s.selected = state;
+    const cb = document.querySelector(`#row-${i} input[type=checkbox]`);
+    if (cb) cb.checked = state;
+  });
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const n = students.filter(s => s.selected).length;
+  document.getElementById('sel-count').textContent = n;
+  document.getElementById('gen-btn').disabled = n === 0;
+}
+
+// ── Generate ──────────────────────────────────────────────────────────────────
+async function generateReports() {
+  const selected = students.filter(s => s.selected);
+  if (!selected.length) return;
+
+  const section = document.getElementById('reports-section');
+  const list    = document.getElementById('reports-list');
+  section.style.display = 'block';
+  list.innerHTML = '';
+  document.getElementById('csv-download-row').style.display = 'none';
+
+  generatedStudents = [...selected];
+
+  // Pre-create loading cards
+  selected.forEach(s => {
+    list.insertAdjacentHTML('beforeend', `
+      <div class="report-card" id="rc-${slugify(s.name)}">
+        <div class="report-header">
+          <span class="report-name">${esc(s.name)}</span>
+          <span class="status-badge badge-loading">
+            <span class="spinner"></span> Generating…
+          </span>
+        </div>
+      </div>`);
+  });
+
+  section.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('gen-btn').disabled = true;
+
+  for (const s of selected) {
+    await generateOne(s);
+    await wait(250);
+  }
+
+  document.getElementById('gen-btn').disabled = false;
+  updateSelCount();
+  document.getElementById('csv-download-row').style.display = 'flex';
+}
+
+async function generateOne(student) {
+  const cardEl = document.getElementById(`rc-${slugify(student.name)}`);
+  const chars  = allChars();
+
+  try {
+    const res = await fetch(`${API_URL}/generate-report`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentName:     student.name,
+        grades:          student.grades,
+        characteristics: chars.map(name => ({ name })),
+        template:        currentTemplate,
+        gender:          student.gender || 'they/them',
+        timing:          currentTiming,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+
+    const { report } = await res.json();
+    const id = slugify(student.name);
+
+    cardEl.innerHTML = `
+      <div class="report-header">
+        <span class="report-name">${esc(student.name)}</span>
+        <span class="status-badge badge-done">✓ Done</span>
+      </div>
+      <div class="grades-pills">
+        ${chars.map(c => `<span class="grade-pill">${esc(c)}: <b>${student.grades[c]}/5</b></span>`).join('')}
+      </div>
+      <div class="report-text" id="rt-${id}">${esc(report)}</div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-secondary btn-sm" onclick="copyReport('${id}', this)">Copy report</button>
+        <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">&#8635; Regenerate</button>
+      </div>`;
+  } catch (err) {
+    cardEl.className = 'report-card error-card';
+    cardEl.innerHTML = `
+      <div class="report-header">
+        <span class="report-name">${esc(student.name)}</span>
+        <span class="status-badge badge-error">✗ Failed</span>
+      </div>
+      <p class="error-msg">${esc(err.message)}</p>
+      <button class="btn btn-secondary btn-sm" onclick="retryOne('${esc(student.name)}')">
+        Retry
+      </button>`;
+  }
+}
+
+function retryOne(name) {
+  const s = students.find(s => s.name === name);
+  if (s) generateOne(s);
+}
+
+async function regenerateOne(name) {
+  const s = students.find(st => st.name === name);
+  if (!s) return;
+
+  const id      = slugify(name);
+  const cardEl  = document.getElementById(`rc-${id}`);
+  const textEl  = document.getElementById(`rt-${id}`);
+  const badge   = cardEl.querySelector('.status-badge');
+  const btns    = cardEl.querySelectorAll('button');
+
+  if (badge) { badge.className = 'status-badge badge-loading'; badge.innerHTML = '<span class="spinner"></span> Regenerating…'; }
+  if (textEl) textEl.innerHTML = '';
+  btns.forEach(b => { b.disabled = true; });
+
+  const chars = allChars();
+  try {
+    const res = await fetch(`${API_URL}/generate-report`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentName:     s.name,
+        grades:          s.grades,
+        characteristics: chars.map(c => ({ name: c })),
+        template:        currentTemplate,
+        gender:          s.gender || 'they/them',
+        timing:          currentTiming,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+    const { report } = await res.json();
+    if (textEl) textEl.innerHTML = esc(report);
+    if (badge) { badge.className = 'status-badge badge-done'; badge.textContent = '✓ Done'; }
+  } catch (err) {
+    if (textEl) textEl.innerHTML = `<span style="color:var(--red);font-size:0.88rem">${esc(err.message)}</span>`;
+    if (badge) { badge.className = 'status-badge badge-error'; badge.textContent = '✗ Failed'; }
+  } finally {
+    btns.forEach(b => { b.disabled = false; });
+  }
+}
+
+async function copyReport(id, btn) {
+  const text = document.getElementById(`rt-${id}`)?.textContent || '';
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = 'Copy report'; }, 2000);
+  } catch {
+    prompt('Copy this report:', text);
+  }
+}
+
+// ── CSV download ──────────────────────────────────────────────────────────────
+function downloadCSV() {
+  const presetChars = TEMPLATES[currentTemplate].chars;
+  const headers = ['Student Name', ...presetChars, 'Report'];
+
+  const rows = generatedStudents.map(s => {
+    const reportEl = document.getElementById(`rt-${slugify(s.name)}`);
+    const reportText = reportEl ? reportEl.textContent : '';
+    return [s.name, ...presetChars.map(c => s.grades[c] ?? ''), reportText];
+  });
+
+  const csv = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\r\n');
+
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  const ts = `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `reports_${currentTemplate}_${ts}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Slider keyboard shortcut ──────────────────────────────────────────────────
+function handleSliderKey(e) {
+  const sliders = [...document.querySelectorAll('#grade-tbody input[type=range]')];
+  const idx = sliders.indexOf(e.target);
+
+  if (/^[1-5]$/.test(e.key)) {
+    e.preventDefault();
+    e.target.value = e.key;
+    e.target.dispatchEvent(new Event('input', { bubbles: true }));
+    const next = sliders[idx + 1];
+    if (next) next.focus();
+
+  } else if (e.key === 'Tab' && !e.shiftKey) {
+    e.preventDefault();
+    const next = sliders[idx + 1];
+    if (next) next.focus();
+
+  } else if (e.key === 'Tab' && e.shiftKey) {
+    e.preventDefault();
+    const prev = sliders[idx - 1];
+    if (prev) prev.focus();
+  }
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── CSV upload ────────────────────────────────────────────────────────────────
+function handleCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result
+      .split(/\r?\n/)
+      .map(l => l.split(',')[0].replace(/^["']|["']$/g, '').trim())
+      .filter(Boolean);
+
+    // Drop a header row if the first line looks like a label (no spaces, all alpha)
+    const names = /^(name|student|pupil|first)$/i.test(lines[0]) ? lines.slice(1) : lines;
+
+    if (!names.length) { alert('No names found in file.'); return; }
+
+    // Show names in the textarea so the user can review/edit before loading
+    document.getElementById('names-input').value = names.join('\n');
+    document.getElementById('csv-preview').style.display = 'block';
+    document.getElementById('csv-preview').textContent =
+      `✓ ${names.length} name${names.length !== 1 ? 's' : ''} loaded from ${file.name}`;
+
+    // Reset input so the same file can be re-uploaded if needed
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearInput() {
+  document.getElementById('names-input').value = '';
+  document.getElementById('csv-preview').style.display = 'none';
+  document.getElementById('csv-preview').textContent = '';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderChars();
+</script>
+</body>
+</html>
