@@ -518,6 +518,25 @@
     @media (max-width: 440px) {
       .header-icon { display: none; }
     }
+
+    /* ── Test Feedback / test data ── */
+    .tf-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .tf-ms-dropzone {
+      border: 2px dashed var(--primary-border); border-radius: var(--radius-sm);
+      padding: 10px 16px; text-align: center; cursor: pointer;
+      background: var(--primary-light); transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .tf-ms-dropzone:hover, .tf-ms-dropzone.drag-over {
+      border-color: var(--primary); background: #E0E7FF;
+    }
+    .tf-ms-drop-hint {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; color: var(--primary); font-size: 0.82rem; font-weight: 500;
+    }
+    @media (max-width: 680px) {
+      .tf-two-col { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -536,6 +555,8 @@
 </header>
 
 <div class="container">
+
+  <div>
 
   <!-- STEP 1: Timing -->
   <div class="step">
@@ -571,12 +592,18 @@
       <div class="step-num">2</div>
       <div class="step-title">Choose a report template</div>
     </div>
-    <div class="option-grid option-grid-2">
+    <div class="option-grid option-grid-3">
       <label class="template-option active" id="opt-formtutor" onclick="setTemplate('formtutor')">
         <input type="radio" name="template" value="formtutor" checked>
         <span class="option-icon">👥</span>
         <div class="template-option-title">Form Tutor Report</div>
         <div class="template-option-desc">Holistic, developmental language. Focus on pastoral care and character.</div>
+      </label>
+      <label class="template-option" id="opt-ks3science" onclick="setTemplate('ks3science')">
+        <input type="radio" name="template" value="ks3science">
+        <span class="option-icon">🔬</span>
+        <div class="template-option-title">KS3 Science Report</div>
+        <div class="template-option-desc">Accessible, encouraging language. For Year 7 and 8 science classes.</div>
       </label>
       <label class="template-option" id="opt-physics" onclick="setTemplate('physics')">
         <input type="radio" name="template" value="physics">
@@ -587,10 +614,42 @@
     </div>
   </div>
 
-  <!-- STEP 3: Characteristics -->
-  <div class="step">
+  <!-- STEP 3: Test data (subject templates only) -->
+  <div class="step" id="test-data-step" style="display:none">
     <div class="step-header">
       <div class="step-num">3</div>
+      <div class="step-title">Test data <span style="font-size:0.72rem;font-weight:500;color:var(--text-faint);background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle">optional</span></div>
+    </div>
+    <p style="margin:0 0 14px;font-size:0.85rem;color:var(--text-mid)">Upload mark scheme + student marks to include academic performance. Leave blank for a personal-only report.</p>
+    <div class="tf-two-col">
+      <div>
+        <label class="input-label">Mark Scheme PDF</label>
+        <div id="tf-ms-dropzone" class="tf-ms-dropzone" onclick="document.getElementById('tf-ms-file').click()">
+          <input type="file" id="tf-ms-file" accept=".pdf" style="display:none" onchange="tfHandlePdfFile(this.files[0])">
+          <input type="hidden" id="tf-mark-scheme">
+          <div id="tf-ms-drop-hint" class="tf-ms-drop-hint">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <span>Drop PDF or click to upload</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="input-label">Student Marks (CSV)</label>
+        <div id="subj-csv-drop" class="tf-ms-dropzone" onclick="document.getElementById('subj-csv-file').click()">
+          <input type="file" id="subj-csv-file" accept=".csv" style="display:none" onchange="subjHandleMarksCsv(this.files[0])">
+          <div id="subj-csv-hint" class="tf-ms-drop-hint">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            <span>Drop CSV or click to upload</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Characteristics -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num" id="step-num-chars">3</div>
       <div class="step-title">Characteristics</div>
     </div>
     <div class="chars-list" id="chars-list"></div>
@@ -601,10 +660,10 @@
     </div>
   </div>
 
-  <!-- STEP 4: Students -->
+  <!-- STEP 5: Students -->
   <div class="step">
     <div class="step-header">
-      <div class="step-num">4</div>
+      <div class="step-num" id="step-num-students">4</div>
       <div class="step-title">Add student names</div>
     </div>
 
@@ -632,10 +691,10 @@
     </div>
   </div>
 
-  <!-- STEP 5: Grade grid -->
+  <!-- STEP 6: Grade grid -->
   <div class="step" id="grade-step" style="display:none">
     <div class="step-header">
-      <div class="step-num">5</div>
+      <div class="step-num" id="step-num-grades">5</div>
       <div class="step-title">Set grades</div>
     </div>
     <div class="grade-controls">
@@ -669,16 +728,24 @@
     </div>
   </div>
 
+  </div>
+
 </div>
 
 <script>
-const API_URL = 'https://report-generator-production-29b1.up.railway.app';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `http://localhost:${window.location.port || 3000}`
+  : 'https://report-generator-production-29b1.up.railway.app';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 const TEMPLATES = {
   physics: {
     label: 'Physics',
     chars: ['Analytical thinking', 'Practical skills', 'Communication', 'Problem-solving', 'Collaboration', 'Engagement'],
+  },
+  ks3science: {
+    label: 'KS3 Science',
+    chars: ['Attendance', 'Punctuality', 'Effort'],
   },
   formtutor: {
     label: 'Form Tutor',
@@ -691,6 +758,7 @@ let currentTiming      = 'end-of-year';
 let customChars        = [];
 let students           = [];
 let generatedStudents  = [];
+let subjStudentCsvData = '';
 
 // ── Timing ────────────────────────────────────────────────────────────────────
 function setTiming(t) {
@@ -704,11 +772,18 @@ function setTiming(t) {
 // ── Template ──────────────────────────────────────────────────────────────────
 function setTemplate(t) {
   currentTemplate = t;
-  document.getElementById('opt-physics').classList.toggle('active', t === 'physics');
-  document.getElementById('opt-formtutor').classList.toggle('active', t === 'formtutor');
+  document.getElementById('opt-physics').classList.toggle('active',    t === 'physics');
+  document.getElementById('opt-ks3science').classList.toggle('active', t === 'ks3science');
+  document.getElementById('opt-formtutor').classList.toggle('active',  t === 'formtutor');
   customChars = [];
   renderChars();
   if (students.length) rebuildGrades();
+
+  const isSubject = t === 'ks3science' || t === 'physics';
+  document.getElementById('test-data-step').style.display          = isSubject ? '' : 'none';
+  document.getElementById('step-num-chars').textContent            = isSubject ? '4' : '3';
+  document.getElementById('step-num-students').textContent         = isSubject ? '5' : '4';
+  document.getElementById('step-num-grades').textContent           = isSubject ? '6' : '5';
 }
 
 function allChars() {
@@ -934,45 +1009,77 @@ function closeBeerModal(btn) {
   overlay.addEventListener('animationend', () => overlay.remove());
 }
 
+function renderTopicPills(topicPerformance) {
+  return '<div class="grades-pills" style="margin-top:8px">' +
+    Object.entries(topicPerformance).map(([topic, data]) => {
+      const pct = data.percentage;
+      const col = pct >= 75 ? 'var(--success)' : pct < 60 ? 'var(--danger)' : 'var(--primary)';
+      return `<span class="grade-pill" style="background:transparent;border-color:${col};color:${col}">${esc(topic)}: <b>${pct}%</b></span>`;
+    }).join('') + '</div>';
+}
+
 async function generateOne(student) {
-  const cardEl = document.getElementById(`rc-${slugify(student.name)}`);
-  const chars  = allChars();
+  const cardEl  = document.getElementById(`rc-${slugify(student.name)}`);
+  const chars   = allChars();
+  const id      = slugify(student.name);
+  const markScheme = document.getElementById('tf-mark-scheme')?.value?.trim() || '';
+  const hasTestData = (currentTemplate === 'ks3science' || currentTemplate === 'physics')
+    && markScheme && subjStudentCsvData;
+  const subject = currentTemplate === 'ks3science' ? 'Science' : 'Physics';
 
   try {
-    const res = await fetch(`${API_URL}/generate-report`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        studentName:     student.name,
-        grades:          student.grades,
-        characteristics: chars.map(name => ({ name })),
-        template:        currentTemplate,
-        gender:          student.gender || 'they/them',
-        timing:          currentTiming,
-      }),
-    });
+    if (hasTestData) {
+      const res = await fetch(`${API_URL}/api/combined-report`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          markScheme, studentData: subjStudentCsvData,
+          studentName: student.name, subject,
+          characteristics: chars.map(name => ({ name })),
+          grades: student.grades, template: currentTemplate,
+          gender: student.gender || 'they/them', timing: currentTiming,
+        }),
+      });
+      if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || `Server error ${res.status}`); }
+      const { report, topicPerformance } = await res.json();
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Server error ${res.status}`);
+      cardEl.innerHTML = `
+        <div class="report-header">
+          <span class="report-name">${esc(student.name)}</span>
+          <span class="status-badge badge-done">✓ Done</span>
+        </div>
+        <div class="grades-pills">${chars.map(c => `<span class="grade-pill">${esc(c)}: <b>${student.grades[c]}/5</b></span>`).join('')}</div>
+        ${topicPerformance ? renderTopicPills(topicPerformance) : ''}
+        <div class="report-text" id="rt-${id}">${esc(report)}</div>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn btn-secondary btn-sm" onclick="copyReport('${id}', this, 'Copy report')">Copy report</button>
+          <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">↻ Regenerate</button>
+        </div>`;
+    } else {
+      const res = await fetch(`${API_URL}/generate-report`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentName: student.name, grades: student.grades,
+          characteristics: chars.map(name => ({ name })),
+          template: currentTemplate, gender: student.gender || 'they/them', timing: currentTiming,
+        }),
+      });
+      if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || `Server error ${res.status}`); }
+      const { report } = await res.json();
+
+      cardEl.innerHTML = `
+        <div class="report-header">
+          <span class="report-name">${esc(student.name)}</span>
+          <span class="status-badge badge-done">✓ Done</span>
+        </div>
+        <div class="grades-pills">${chars.map(c => `<span class="grade-pill">${esc(c)}: <b>${student.grades[c]}/5</b></span>`).join('')}</div>
+        <div class="report-text" id="rt-${id}">${esc(report)}</div>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn btn-secondary btn-sm" onclick="copyReport('${id}', this, 'Copy report')">Copy report</button>
+          <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">↻ Regenerate</button>
+        </div>`;
     }
-
-    const { report } = await res.json();
-    const id = slugify(student.name);
-
-    cardEl.innerHTML = `
-      <div class="report-header">
-        <span class="report-name">${esc(student.name)}</span>
-        <span class="status-badge badge-done">✓ Done</span>
-      </div>
-      <div class="grades-pills">
-        ${chars.map(c => `<span class="grade-pill">${esc(c)}: <b>${student.grades[c]}/5</b></span>`).join('')}
-      </div>
-      <div class="report-text" id="rt-${id}">${esc(report)}</div>
-      <div class="btn-row" style="margin-top:0">
-        <button class="btn btn-secondary btn-sm" onclick="copyReport('${id}', this)">Copy report</button>
-        <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">↻ Regenerate</button>
-      </div>`;
   } catch (err) {
     cardEl.className = 'report-card error-card';
     cardEl.innerHTML = `
@@ -981,80 +1088,46 @@ async function generateOne(student) {
         <span class="status-badge badge-error">✗ Failed</span>
       </div>
       <p class="error-msg">${esc(err.message)}</p>
-      <button class="btn btn-secondary btn-sm" onclick="retryOne('${esc(student.name)}')">Retry</button>`;
+      <button class="btn btn-secondary btn-sm" onclick="regenerateOne('${esc(student.name)}')">Retry</button>`;
   }
-}
-
-function retryOne(name) {
-  const s = students.find(s => s.name === name);
-  if (s) generateOne(s);
 }
 
 async function regenerateOne(name) {
   const s = students.find(st => st.name === name);
   if (!s) return;
-
-  const id      = slugify(name);
-  const cardEl  = document.getElementById(`rc-${id}`);
-  const textEl  = document.getElementById(`rt-${id}`);
-  const badge   = cardEl.querySelector('.status-badge');
-  const btns    = cardEl.querySelectorAll('button');
-
-  if (badge) { badge.className = 'status-badge badge-loading'; badge.innerHTML = '<span class="spinner"></span> Regenerating…'; }
-  if (textEl) textEl.innerHTML = '';
-  btns.forEach(b => { b.disabled = true; });
-
-  const chars = allChars();
-  try {
-    const res = await fetch(`${API_URL}/generate-report`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        studentName:     s.name,
-        grades:          s.grades,
-        characteristics: chars.map(c => ({ name: c })),
-        template:        currentTemplate,
-        gender:          s.gender || 'they/them',
-        timing:          currentTiming,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Server error ${res.status}`);
-    }
-    const { report } = await res.json();
-    if (textEl) textEl.innerHTML = esc(report);
-    if (badge) { badge.className = 'status-badge badge-done'; badge.textContent = '✓ Done'; }
-  } catch (err) {
-    if (textEl) textEl.innerHTML = `<span style="color:var(--danger);font-size:0.88rem">${esc(err.message)}</span>`;
-    if (badge) { badge.className = 'status-badge badge-error'; badge.textContent = '✗ Failed'; }
-  } finally {
-    btns.forEach(b => { b.disabled = false; });
-  }
+  const cardEl = document.getElementById(`rc-${slugify(name)}`);
+  cardEl.className = 'report-card';
+  cardEl.innerHTML = `
+    <div class="report-header">
+      <span class="report-name">${esc(name)}</span>
+      <span class="status-badge badge-loading"><span class="spinner"></span> Regenerating…</span>
+    </div>`;
+  await generateOne(s);
 }
 
 let beerAgreed    = false;
 let pendingAction = null;
 
-async function copyReport(id, btn) {
+async function copyReport(id, btn, label = 'Copy report') {
   if (!beerAgreed) {
-    pendingAction = () => doCopy(id, btn);
+    pendingAction = () => doCopy(id, btn, label);
     showBeerModal();
     return;
   }
-  await doCopy(id, btn);
+  await doCopy(id, btn, label);
 }
 
-async function doCopy(id, btn) {
+async function doCopy(id, btn, label = 'Copy report') {
   const text = document.getElementById(`rt-${id}`)?.textContent || '';
   try {
     await navigator.clipboard.writeText(text);
     btn.textContent = '✓ Copied!';
-    setTimeout(() => { btn.textContent = 'Copy report'; }, 2000);
+    setTimeout(() => { btn.textContent = label; }, 2000);
   } catch {
     prompt('Copy this report:', text);
   }
 }
+
 
 function beerAgree(btn) {
   beerAgreed = true;
@@ -1123,8 +1196,7 @@ function doDownloadCSV() {
   const headers = ['Student Name', ...presetChars, 'Report'];
 
   const rows = generatedStudents.map(s => {
-    const reportEl = document.getElementById(`rt-${slugify(s.name)}`);
-    const reportText = reportEl ? reportEl.textContent : '';
+    const reportText = document.getElementById(`rt-${slugify(s.name)}`)?.textContent || '';
     return [s.name, ...presetChars.map(c => s.grades[c] ?? ''), reportText];
   });
 
@@ -1207,6 +1279,82 @@ function clearInput() {
   document.getElementById('csv-preview').style.display = 'none';
   document.getElementById('csv-preview').textContent = '';
 }
+
+// ── Subject marks CSV upload ──────────────────────────────────────────────────
+function subjHandleMarksCsv(file) {
+  if (!file) return;
+  const hint = document.getElementById('subj-csv-hint');
+  const reader = new FileReader();
+  reader.onload = () => {
+    subjStudentCsvData = reader.result;
+    const lines = reader.result.trim().split(/\r?\n/);
+    const names = lines.slice(1)
+      .map(l => l.split(',')[0].replace(/^["']|["']$/g, '').trim())
+      .filter(Boolean);
+    document.getElementById('names-input').value = names.join('\n');
+    document.getElementById('csv-preview').style.display = 'block';
+    document.getElementById('csv-preview').textContent =
+      `✓ ${names.length} student${names.length !== 1 ? 's' : ''} loaded from ${file.name}`;
+    hint.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${esc(file.name)} — ${names.length} students</span>`;
+  };
+  reader.onerror = () => {
+    hint.innerHTML = `<span style="color:var(--danger)">&#9888; Could not read file.</span>`;
+  };
+  reader.readAsText(file);
+}
+
+// ── Mark-scheme PDF upload ────────────────────────────────────────────────────
+async function tfHandlePdfFile(file) {
+  if (!file) return;
+  const hint = document.getElementById('tf-ms-drop-hint');
+  hint.innerHTML = '<span class="spinner" style="border-color:rgba(79,70,229,0.25);border-top-color:var(--primary)"></span> Extracting mark scheme…';
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await fetch(`${API_URL}/api/parse-mark-scheme`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ pdfBase64: base64 }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${res.status}`);
+    }
+    const { markScheme } = await res.json();
+    document.getElementById('tf-mark-scheme').value = markScheme;
+    document.getElementById('tf-ms-dropzone').dataset.loaded = '1';
+    hint.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${esc(file.name)} — extracted. Edit below if needed.</span>`;
+  } catch (err) {
+    hint.innerHTML = `<span style="color:var(--danger)">&#9888; ${esc(err.message)}</span>`;
+  }
+}
+
+(function initDropzones() {
+  function wire(id, ext, handler) {
+    const dz = document.getElementById(id);
+    if (!dz) return;
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', ()  => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.toLowerCase().endsWith(ext)) handler(file);
+    });
+  }
+  wire('tf-ms-dropzone', '.pdf', tfHandlePdfFile);
+  wire('subj-csv-drop',  '.csv', subjHandleMarksCsv);
+})();
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderChars();
